@@ -1,0 +1,45 @@
+from selenium import webdriver
+import time
+import re
+import codecs
+
+# 设置自己的浏览器
+options = webdriver.ChromeOptions()
+options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
+driver = webdriver.Chrome(chrome_options=options)
+
+# 爬取结果保存的路径
+result = codecs.open('jieguo.txt', 'w', 'utf-8')
+# 网页URL
+url = "http://www.nppa.gov.cn/nppa/channels/320.shtml"
+driver.get(url)
+# 设置隐式等待。
+driver.implicitly_wait(10)
+
+# 定位新闻标题的Xpath，用星号 ※ 匹配
+A = "/html/body/div[2]/div[4]/div[2]/div[2]/ul/li["
+B = "]/div/a"
+C = A + "*" + B
+
+# 设置爬取页数，得到href值。
+num = 1
+
+while num < 10:
+    link_url = driver.find_elements_by_xpath(C)
+    for link in link_url:
+        print(link.text)
+        print(link.get_attribute('href'))
+        result.write(link.get_attribute('href'))
+        result.write("\r\n")
+        # 找到对应下一页的网页元素。执行点击操作
+    driver.find_element_by_link_text('下一页').click()
+    # 设置停顿秒数，防止爬取太快报错，有些网页不需要该句，我们可以自己测试一下。
+    time.sleep(1)
+
+    num = num + 1
+#关闭结果文件的写入
+result.close()
+#关闭和退出浏览器
+driver.close()
+driver.quit()
+
