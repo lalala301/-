@@ -1,0 +1,48 @@
+import codecs
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+
+import time
+
+#配置自己爬取内容的浏览器
+options = webdriver.ChromeOptions()
+options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
+driver = webdriver.Chrome(chrome_options=options)
+
+# 爬取结果保存的路径
+result = codecs.open('leixing.txt', 'w', 'utf-8')
+
+#打开存储超链接的文本
+f = codecs.open("jieguo.txt", 'r', 'utf-8')
+#读取每一行超链接，目的是循环打开每个超链接
+R = f.readlines()
+R1 = len(R)
+
+#为每条新闻设置标题
+k = 0
+while k < R1:
+    S = R[k]
+    print(S)
+    print('Page ', k + 1, '/', R1)
+    driver.get(S)
+    m = k + 1
+    result.write(u'Page: ' + str(m))
+    result.write("\r\n")
+    #try捕捉异常，定位新闻内容的Xpath。并存储到自己指定的文件中
+    
+    A = "/html/body/div[2]/div[4]/div[2]/div[2]/table[2]/tbody[2]/tr["
+    B = "]/td[3]"
+    C = A + "*" + B
+    
+    link_url = driver.find_elements_by_xpath(C)
+    for link in link_url:
+        print(link.text)
+        result.write(link.text)
+        result.write("\r\n")
+    time.sleep(1)
+    k=k+1       
+#关闭结果文件的写入
+result.close()
+#关闭和退出浏览器
+driver.close()
+driver.quit()
